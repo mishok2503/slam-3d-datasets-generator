@@ -1,12 +1,11 @@
-#ifndef MAPGENERATOR_CUBEMAPGENERATOR_H
-#define MAPGENERATOR_CUBEMAPGENERATOR_H
+#pragma once
 
 #include "MapGenerator.h"
 
-class CubeMapGenerator : public MapGenerator {
+class TCubeMapGenerator : public IMapGenerator {
 public:
-    Map generate(MapSize size) override {
-        auto res = Map(size);
+    TMap generate(TMapSize size) override {
+        auto res = TMap(size);
         for (unsigned i = 0; i < size.nx; ++i) {
             for (unsigned j = 0; j < size.ny; ++j) {
                 for (unsigned k = 0; k < size.nz; ++k) {
@@ -19,5 +18,3 @@ public:
         return res;
     }
 };
-
-#endif //MAPGENERATOR_CUBEMAPGENERATOR_H

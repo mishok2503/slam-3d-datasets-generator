@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
-project(MapGenerator)
+project(SLAM3dMapGenerator)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(MapGenerator main.cpp Cell.h Map.h MapGenerator.h CubeMapGenerator.h Simulator.cpp Simulator.h Robot.h)
+add_executable(generator main.cpp Simulator.cpp)
+
+target_include_directories(generator PRIVATE include)

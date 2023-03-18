@@ -1,14 +1,19 @@
-#include <fstream>
 #include "Simulator.h"
 #include "CubeMapGenerator.h"
 
+#include <fstream>
+
 int main() {
-    const MapSize mapSize{10, 10, 5};
+    constexpr TMapSize MAP_SIZE{10, 10, 8};
+    constexpr unsigned STEPS_COUNT = 10;
+    constexpr unsigned LIDAR_POINTS_COUNT = 4000;
 
     std::ofstream file("result.txt");
 
-    Simulator simulator(mapSize, std::unique_ptr<MapGenerator>{new CubeMapGenerator()});
-    simulator.run(20, file);
+    std::unique_ptr<IMapGenerator> mapGenerator{new TCubeMapGenerator()};
+
+    Simulator simulator(MAP_SIZE, std::move(mapGenerator));
+    simulator.run(STEPS_COUNT, LIDAR_POINTS_COUNT, file);
 
     file.close();
 

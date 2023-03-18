@@ -1,13 +1,10 @@
-#ifndef MAPGENERATOR_MAPGENERATOR_H
-#define MAPGENERATOR_MAPGENERATOR_H
+#pragma once
 
 #include "Map.h"
 
-class MapGenerator {
+class IMapGenerator {
 public:
-    virtual Map generate(MapSize) = 0;
+    virtual TMap generate(TMapSize) = 0;
 
-    virtual ~MapGenerator() = default;
+    virtual ~IMapGenerator() = default;
 };
-
-#endif //MAPGENERATOR_MAPGENERATOR_H

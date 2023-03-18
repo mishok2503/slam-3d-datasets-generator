@@ -1,12 +1,13 @@
-#ifndef MAPGENERATOR_MAP_H
-#define MAPGENERATOR_MAP_H
+#pragma once
 
 #include <iostream>
 #include <vector>
-#include "Cell.h"
-#include "matrix.hpp"
+#include <optional>
 
-struct MapSize {
+#include "Cell.h"
+#include "mutil.h"
+
+struct TMapSize {
     const unsigned nx, ny, nz;
 
     bool Check(unsigned x, unsigned y, unsigned z) {
@@ -14,18 +15,18 @@ struct MapSize {
     }
 };
 
-class Map {
+class TMap {
 public:
-    using TRow = std::vector<Cell>;
+    using TRow = std::vector<TCell>;
     using TPlane = std::vector<TRow>;
-    using TMap = std::vector<TPlane>;
+    using TMapData = std::vector<TPlane>;
 private:
-    TMap map;
-    MapSize size;
+    TMapData map;
+    TMapSize size;
 
 public:
-    Map(MapSize size) :
-        map(TMap(size.nx, TPlane(size.ny, TRow(size.nz)))),
+    explicit TMap(TMapSize size) :
+        map(TMapData(size.nx, TPlane(size.ny, TRow(size.nz)))),
         size(size) {}
 
     void SetCell(unsigned x, unsigned y, unsigned z, bool isOccupied) {
@@ -35,43 +36,43 @@ public:
         map[x][y][z].isOccupied = isOccupied;
     }
 
-    [[nodiscard]] MapSize GetSize() const {
+    [[nodiscard]] TMapSize GetSize() const {
         return size;
     }
 
-    [[nodiscard]] std::tuple<double, double, double> GetFreeCell() const {
-        while (true) {
-            int x = rand() % size.nx;
+    [[nodiscard]] mutil::Vector3 GetFreeCell() const {
+        while (true) { // TODO: endless loop
+            int x = rand() % size.nx; // TODO: norm rand
             int y = rand() % size.ny;
             int z = rand() % size.nz;
             if (!map[x][y][z].isOccupied) {
-                return std::make_tuple(x + 0.5, y + 0.5, z + 0.5);
+                return mutil::Vector3(x + 0.5, y + 0.5, z + 0.5);
             }
         }
     }
 
-    double GetDistance(Matrix pos, Matrix dir) const {
-        constexpr double dt = 0.01;
-        auto check = [this](Matrix p) {
+    [[nodiscard]] std::optional<float> GetDistance(mutil::Vector3 pos, mutil::Vector3 dir) const {
+        constexpr float dt = 0.01;
+        auto check = [this](mutil::Vector3 p) {
             for (int i=0; i < size.nx; ++i) {
                 for (int j=0; j < size.ny; ++j) {
                     for (int k=0; k < size.nz; ++k) {
                         if (!map[i][j][k].isOccupied) continue;
-                        if (i < p[0][0] && p[0][0] < i + 1 &&
-                            j < p[1][0] && p[1][0] < j + 1 &&
-                            k < p[2][0] && p[2][0] < k + 1) {
+                        if (i < p[0] && p[0] < i + 1 &&
+                            j < p[1] && p[1] < j + 1 &&
+                            k < p[2] && p[2] < k + 1) {
                             return true;
                         }
                     }
                 }
             }
+            return false;
         };
-        for (double t=dt; t < 10; t += dt) {
+        for (float t=dt; t < 10; t += dt) {
             if (check(pos + dir * t)) {
-                return t;
+                return {t};
             }
         }
+        return {};
     }
 };
-
-#endif //MAPGENERATOR_MAP_H

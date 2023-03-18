@@ -1,71 +1,48 @@
-#ifndef MAPGENERATOR_ROBOT_H
-#define MAPGENERATOR_ROBOT_H
+#pragma once
 
+#include "mutil.h"
 #include "Map.h"
-#include "matrix.hpp"
+#include "Lidar.h"
 
-struct RobotPos {
-    Matrix pos{3, 1};
-    Matrix rot;
-    Matrix dir{3, 1};
-
-    RobotPos(double x, double y, double z) : rot(feng::eye<double>( 3, 3 )) {
-        dir[0][0] = 1;
-        pos[0][0] = x;
-        pos[1][0] = y;
-        pos[2][0] = z;
-    }
-
-    void go(double speed) {
-        pos += rot.inverse() * dir * speed;
-    }
-};
-
-std::vector<Matrix> FibonacciSphere() {
-    constexpr int N = 2000;
-    constexpr double phi = 2.399963229728653;
-    static auto res = [&]() {
-        std::vector<Matrix> p(N);
-        for (int i=0; i < N; ++i) {
-            double y = 1 - (i / static_cast<double>(N - 1)) * 2;
-            double r = sqrt(1 - y * y);
-            double t = phi * i;
-            double x = cos(t) * r;
-            double z = sin(t) * r;
-            p[i][0][0] = x;
-            p[i][1][0] = y;
-            p[i][2][0] = z;
-        }
-        return p;
-    }();
-    return res;
-}
-
-class Robot {
+class TRobot {
 private:
-    RobotPos pos;
-    double speed;
+    float Speed;
+    mutil::Vector3 Position;
+    mutil::Vector3 EulerAngles;
+    mutil::Matrix3 RotationMatrix;
+    mutil::Vector3 ForwardDirection;
+    std::unique_ptr<ILidar> Lidar;
 
 public:
-    Robot(RobotPos pos) : pos(pos) {}
 
-    std::vector<Matrix> EmulateLidar(const Map& map) {
-        const double dt = 0.01;
-        std::vector<Matrix> points = FibonacciSphere();
-        for (auto& point: points) {
-            auto p = pos.rot.inverse() * point;
-            double r = map.GetDistance(pos.pos, p);
-            p *= r;
+    TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed = 0.1,
+           mutil::Vector3 eulerAngles = {}, mutil::Vector3 forwardDirection = {1, 0, 0}) :
+           Speed(speed), Position(position), EulerAngles(eulerAngles), RotationMatrix(GetRotationMatrix(eulerAngles)),
+           ForwardDirection(forwardDirection), Lidar(std::move(lidar)) {}
+
+    std::vector<mutil::Vector3> EmulateLidar(const TMap &map) {
+        auto points = Lidar->GetPoints();
+        for (auto &point: points) {
+            auto p = RotationMatrix.inverse() * point;
+            float r = *map.GetDistance(Position, p); // TODO: optional
+            point *= r;
         }
         return points;
     }
 
-    std::pair<Matrix, Matrix> Move() {
-        auto t = pos.pos;
-        pos.go(0.2);
-        return {pos.pos - t, feng::zeros(3, 1)};
+    std::pair<mutil::Vector3, mutil::Vector3> Move() {
+        auto t = Position;
+        Position += RotationMatrix.inverse() * ForwardDirection * Speed;
+        return {Position - t, {}};
     }
+
+    static mutil::Matrix3 GetRotationMatrix(mutil::Vector3 eulerAngles) {
+        float a = eulerAngles.x, b = eulerAngles.y, c = eulerAngles.z;
+        return mutil::Matrix3{
+            cos(a) * cos(c) - sin(a) * cos(b) * sin(c), -cos(a) * sin(c) - sin(a) * cos(b) * cos(c),  sin(a) * sin(b),
+            sin(a) * cos(c) + cos(a) * cos(b) * sin(c), -sin(a) * sin(c) + cos(a) * cos(b) * cos(c), -cos(a) * sin(b),
+            sin(b) * sin(c), sin(b) * cos(c), cos(b)
+        };
+    }
+
 };
-
-
-#endif //MAPGENERATOR_ROBOT_H

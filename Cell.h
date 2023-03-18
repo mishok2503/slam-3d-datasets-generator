@@ -1,8 +1,5 @@
-#ifndef MAPGENERATOR_CELL_H
-#define MAPGENERATOR_CELL_H
+#pragma once
 
-struct Cell {
+struct TCell {
     bool isOccupied;
 };
-
-#endif //MAPGENERATOR_CELL_H
