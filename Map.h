@@ -3,15 +3,19 @@
 #include <iostream>
 #include <vector>
 #include <optional>
+#include <random>
+#include <stdexcept>
 
 #include "Cell.h"
 #include "mutil.h"
 
 struct TMapSize {
-    const unsigned nx, ny, nz;
+    const unsigned X, Y, Z;
 
-    bool Check(unsigned x, unsigned y, unsigned z) {
-        return x < nx && y < ny && z < nz;
+    void Check(unsigned x, unsigned y, unsigned z) const {
+        if (!(x < X && y < Y && z < Z)) {
+            throw std::invalid_argument("Out of Map borders");
+        }
     }
 };
 
@@ -21,32 +25,35 @@ public:
     using TPlane = std::vector<TRow>;
     using TMapData = std::vector<TPlane>;
 private:
-    TMapData map;
-    TMapSize size;
+    TMapData Map;
+    TMapSize Size;
 
 public:
     explicit TMap(TMapSize size) :
-        map(TMapData(size.nx, TPlane(size.ny, TRow(size.nz)))),
-        size(size) {}
+        Map(TMapData(size.X, TPlane(size.Y, TRow(size.Y)))),
+        Size(size) {}
 
     void SetCell(unsigned x, unsigned y, unsigned z, bool isOccupied) {
-        if (!size.Check(x, y, z)) {
-            std::cerr << "ERROR: out of borders!\n";
-        }
-        map[x][y][z].isOccupied = isOccupied;
+        Size.Check(x, y, z);
+        Map[x][y][z].isOccupied = isOccupied;
     }
 
     [[nodiscard]] TMapSize GetSize() const {
-        return size;
+        return Size;
     }
 
     [[nodiscard]] mutil::Vector3 GetFreeCell() const {
-        while (true) { // TODO: endless loop
-            int x = rand() % size.nx; // TODO: norm rand
-            int y = rand() % size.ny;
-            int z = rand() % size.nz;
-            if (!map[x][y][z].isOccupied) {
-                return mutil::Vector3(x + 0.5, y + 0.5, z + 0.5);
+        std::random_device randomDevice;
+        std::mt19937 randomGenerator{randomDevice()};
+        std::uniform_int_distribution<unsigned> rx(0, Size.X - 1);
+        std::uniform_int_distribution<unsigned> ry(0, Size.Y - 1);
+        std::uniform_int_distribution<unsigned> rz(0, Size.Z - 1);
+        while (true) {
+            unsigned x = rx(randomGenerator);
+            unsigned y = ry(randomGenerator);
+            unsigned z = rz(randomGenerator);
+            if (!Map[x][y][z].isOccupied) {
+                return {x + 0.5f, y + 0.5f, z + 0.5f};
             }
         }
     }
@@ -54,13 +61,16 @@ public:
     [[nodiscard]] std::optional<float> GetDistance(mutil::Vector3 pos, mutil::Vector3 dir) const {
         constexpr float dt = 0.01;
         auto check = [this](mutil::Vector3 p) {
-            for (int i=0; i < size.nx; ++i) {
-                for (int j=0; j < size.ny; ++j) {
-                    for (int k=0; k < size.nz; ++k) {
-                        if (!map[i][j][k].isOccupied) continue;
-                        if (i < p[0] && p[0] < i + 1 &&
-                            j < p[1] && p[1] < j + 1 &&
-                            k < p[2] && p[2] < k + 1) {
+            for (int i=0; i < Size.X; ++i) {
+                if (p.x < i) break;
+                if (p.x > i + 1) continue;
+                for (int j=0; j < Size.Y; ++j) {
+                    if (p.y < j) break;
+                    if (p.y > j + 1) continue;
+                    for (int k=0; k < Size.Z; ++k) {
+                        if (p.z < k) break;
+                        if (p.z > k + 1) continue;
+                        if (Map[i][j][k].isOccupied) {
                             return true;
                         }
                     }
@@ -75,4 +85,12 @@ public:
         }
         return {};
     }
+};
+
+
+class IMapGenerator {
+public:
+    virtual TMap Generate() = 0;
+
+    virtual ~IMapGenerator() = default;
 };

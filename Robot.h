@@ -33,6 +33,7 @@ public:
     std::pair<mutil::Vector3, mutil::Vector3> Move() {
         auto t = Position;
         Position += RotationMatrix.inverse() * ForwardDirection * Speed;
+        Position.y -= Speed; // TODO: remove
         return {Position - t, {}};
     }
 
@@ -44,5 +45,16 @@ public:
             sin(b) * sin(c), sin(b) * cos(c), cos(b)
         };
     }
+};
 
+class TRobotGenerator {
+private:
+    std::unique_ptr<ILidar> Lidar;
+
+public:
+    explicit TRobotGenerator(std::unique_ptr<ILidar> lidar) : Lidar(std::move(lidar)) {}
+
+    TRobot Generate(mutil::Vector3 position = {}) {
+        return {position, std::move(Lidar)};
+    }
 };

@@ -6,9 +6,6 @@ class TFibonacciLidar : public ILidar {
 private:
     const unsigned pointsCount;
 
-public:
-    explicit TFibonacciLidar(unsigned pointsCount) : pointsCount(pointsCount) {}
-
     [[nodiscard]] std::vector<mutil::Vector3> GetPointsImpl() const override {
         constexpr float phi = 2.399963229728653;
         std::vector<mutil::Vector3> p(pointsCount);
@@ -20,4 +17,7 @@ public:
         }
         return p;
     }
+
+public:
+    explicit TFibonacciLidar(unsigned pointsCount) : pointsCount(pointsCount) {}
 };
