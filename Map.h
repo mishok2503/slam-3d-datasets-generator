@@ -1,13 +1,17 @@
 #pragma once
 
+#include <array>
 #include <iostream>
 #include <vector>
 #include <optional>
 #include <random>
+#include <ranges>
 #include <stdexcept>
+#include <valarray>
 
 #include "Cell.h"
 #include "mutil.h"
+#include "Lidar.h"
 
 struct TMapSize {
     const unsigned X, Y, Z;
@@ -28,38 +32,39 @@ private:
     TMapData Map;
     TMapSize Size;
 
+    static constexpr int SEED = 239;
+    mutable std::mt19937 RandomGenerator{SEED};
+    mutable std::uniform_int_distribution<unsigned> XDistribution;
+    mutable std::uniform_int_distribution<unsigned> YDistribution;
+    mutable std::uniform_int_distribution<unsigned> ZDistribution;
 public:
-    explicit TMap(TMapSize size) :
-        Map(TMapData(size.X, TPlane(size.Y, TRow(size.Y)))),
-        Size(size) {}
+    explicit TMap(TMapSize size, bool isFilled = false) :
+        Map(TMapData(size.X, TPlane(size.Y, TRow(size.Y, {isFilled})))), Size(size),
+        XDistribution(0, Size.X - 1), YDistribution(0, Size.Y - 1), ZDistribution(0, Size.Z - 1) {}
 
     void SetCell(unsigned x, unsigned y, unsigned z, bool isOccupied) {
         Size.Check(x, y, z);
         Map[x][y][z].isOccupied = isOccupied;
     }
 
-    [[nodiscard]] TMapSize GetSize() const {
-        return Size;
+    [[nodiscard]] bool IsCellOccupied(unsigned x, unsigned y, unsigned z) const {
+        Size.Check(x, y, z);
+        return Map[x][y][z].isOccupied;
     }
 
     [[nodiscard]] mutil::Vector3 GetFreeCell() const {
-        std::random_device randomDevice;
-        std::mt19937 randomGenerator{randomDevice()};
-        std::uniform_int_distribution<unsigned> rx(0, Size.X - 1);
-        std::uniform_int_distribution<unsigned> ry(0, Size.Y - 1);
-        std::uniform_int_distribution<unsigned> rz(0, Size.Z - 1);
         while (true) {
-            unsigned x = rx(randomGenerator);
-            unsigned y = ry(randomGenerator);
-            unsigned z = rz(randomGenerator);
+            unsigned x = XDistribution(RandomGenerator);
+            unsigned y = YDistribution(RandomGenerator);
+            unsigned z = ZDistribution(RandomGenerator);
             if (!Map[x][y][z].isOccupied) {
                 return {x + 0.5f, y + 0.5f, z + 0.5f};
             }
         }
     }
 
-    [[nodiscard]] std::optional<float> GetDistance(mutil::Vector3 pos, mutil::Vector3 dir) const {
-        constexpr float dt = 0.01;
+    [[nodiscard]] std::pair<TLidarPoint::Type, float> GetDistance(mutil::Vector3 pos, mutil::Vector3 dir, const float maxDepth) const {
+        constexpr float dt = 0.05;
         auto check = [this](mutil::Vector3 p) {
             for (int i=0; i < Size.X; ++i) {
                 if (p.x < i) break;
@@ -78,12 +83,12 @@ public:
             }
             return false;
         };
-        for (float t=dt; t < 10; t += dt) {
+        for (float t=dt; t < maxDepth; t += dt) {
             if (check(pos + dir * t)) {
-                return {t};
+                return {TLidarPoint::Type::POINT, t};
             }
         }
-        return {};
+        return {TLidarPoint::Type::MAX, maxDepth};
     }
 };
 

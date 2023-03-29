@@ -24,4 +24,8 @@ public:
         static auto res = GetPointsImpl();
         return res;
     }
+
+    [[nodiscard]] virtual float GetMaxDepth() const = 0;
+
+    virtual ~ILidar() = default;
 };
