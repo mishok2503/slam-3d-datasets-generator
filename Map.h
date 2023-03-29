@@ -5,9 +5,7 @@
 #include <vector>
 #include <optional>
 #include <random>
-#include <ranges>
 #include <stdexcept>
-#include <valarray>
 
 #include "Cell.h"
 #include "mutil.h"

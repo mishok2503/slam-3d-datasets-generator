@@ -9,18 +9,27 @@ namespace {
     }
 } // namespace
 
-void Simulator::Run(unsigned steps, std::ostream& os) {
-    os << steps << '\n';
+void Simulator::Run(unsigned steps, std::ostream& dataOs, std::ostream& groundTruthOs) {
+    auto print = [&](const auto& v) {
+        dataOs << v << '\n';
+        groundTruthOs << v << '\n';
+    };
+    constexpr int SEED = 239;
+    std::mt19937 randomGenerator{SEED};
+    print(steps);
     for (int i = 0; i < steps; ++i) {
         auto pointsCloud = Robot.EmulateLidar(Map);
-        os << pointsCloud.size() << '\n';
+        print(pointsCloud.size());
         for (const auto &point: pointsCloud) {
-            os << point.type << '\n';
+            print(point.type);
             if (point.type == TLidarPoint::Type::POINT) {
-                os << point.data << '\n';
+                groundTruthOs << point.data << '\n';
+                dataOs << AddPositionError(point.data, Robot.GetLidarVarCoef(), randomGenerator) << '\n';
             }
         }
         auto const& [pos, rot] = Robot.Move(Map);
-        os << pos << ' ' << rot << '\n';
+        groundTruthOs << pos << ' ' << rot << '\n';
+        dataOs << AddPositionError(pos, Robot.PositionVarCoef, randomGenerator) << ' '
+               << AddRotationError(rot, Robot.AnglesVarCoef  , randomGenerator) << '\n';
     }
 }

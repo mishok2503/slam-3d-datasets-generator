@@ -9,9 +9,9 @@ private:
     TRobot Robot;
 
 public:
-    Simulator(std::unique_ptr<IMapGenerator> mapGenerator, std::unique_ptr<TRobotGenerator> robotGenerator) :
-        Map(mapGenerator->Generate()), Robot(robotGenerator->Generate(Map.GetFreeCell())) {}
+    Simulator(std::unique_ptr<IMapGenerator> mapGenerator, std::unique_ptr<TRobotBuilder> robotBuilder) :
+        Map(mapGenerator->Generate()), Robot(robotBuilder->SetPosition(Map.GetFreeCell()).Build()) {}
 
-    void Run(unsigned steps, std::ostream& os);
+    void Run(unsigned steps, std::ostream& dataOs, std::ostream& groundTruthOs);
 
 };

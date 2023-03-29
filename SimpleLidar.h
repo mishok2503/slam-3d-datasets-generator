@@ -6,6 +6,7 @@ class TSimpleLidar : public ILidar {
 private:
     const unsigned pointsCount;
     const float MaxDepth;
+    const float VarCoef;
     const float downAngle; // in radians, from 0 to PI / 2
     const float upAngle; // same
 
@@ -28,10 +29,14 @@ private:
     }
 
 public:
-    TSimpleLidar(unsigned pointsCount, float maxDepth, float downAngle = M_PI / 3, float upAngle = M_PI / 3) :
-        pointsCount(pointsCount), downAngle(downAngle), upAngle(upAngle), MaxDepth(maxDepth) {}
+    TSimpleLidar(unsigned pointsCount, float maxDepth, float varCoef, float downAngle = M_PI / 3, float upAngle = M_PI / 3) :
+        pointsCount(pointsCount), MaxDepth(maxDepth), VarCoef(varCoef), downAngle(downAngle), upAngle(upAngle) {}
 
     [[nodiscard]] float GetMaxDepth() const override {
         return MaxDepth;
+    }
+
+    [[nodiscard]] float GetVarCoef() const override {
+        return VarCoef;
     }
 };

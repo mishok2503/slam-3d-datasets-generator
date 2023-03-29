@@ -3,6 +3,7 @@
 #include "mutil.h"
 #include "Map.h"
 #include "Lidar.h"
+#include "util.h"
 
 class TRobot {
 private:
@@ -17,14 +18,17 @@ private:
     const float minAllowedDistance = 0.2;
 
     static constexpr int SEED = 239;
-    std::mt19937 RandomGenerator{SEED};
+    mutable std::mt19937 RandomGenerator{SEED};
     std::uniform_real_distribution<float> TwoPiDistribution{0, 2 * M_PI};
-public:
 
-    TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed = 0.1,
-           mutil::Vector3 eulerAngles = {}, mutil::Vector3 forwardDirection = {1, 0, 0}) :
-           Speed(speed), Position(position), EulerAngles(eulerAngles), RotationMatrix(GetRotationMatrix(eulerAngles)),
-           ForwardDirection(forwardDirection), Lidar(std::move(lidar)) {}
+public:
+    const float PositionVarCoef;
+    const float AnglesVarCoef;
+
+    TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed,
+           mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection, float positionVarCoef, float anglesVarCoef) :
+           Speed(speed), Position(position), EulerAngles(eulerAngles), RotationMatrix(GetRotationMatrixInv(eulerAngles)),
+           ForwardDirection(forwardDirection), Lidar(std::move(lidar)), PositionVarCoef(positionVarCoef), AnglesVarCoef(anglesVarCoef) {}
 
     std::vector<TLidarPoint> EmulateLidar(const TMap &map) {
         std::vector<TLidarPoint> res;
@@ -45,8 +49,12 @@ public:
             const auto prevMinDistance = minDistance;
             const auto prevPosition = Position;
             while (true) {
-                EulerAngles = {TwoPiDistribution(RandomGenerator), 0, 0};
-                RotationMatrix = GetRotationMatrix(EulerAngles);
+                EulerAngles = {
+                        TwoPiDistribution(RandomGenerator),
+                        TwoPiDistribution(RandomGenerator),
+                        TwoPiDistribution(RandomGenerator)
+                };
+                RotationMatrix = GetRotationMatrixInv(EulerAngles);
                 Position += RotationMatrix * ForwardDirection * Speed;
                 EmulateLidar(map);
                 Position = prevPosition;
@@ -59,24 +67,69 @@ public:
         return {ForwardDirection * Speed, EulerAngles - prevAngles};
     }
 
-    static mutil::Matrix3 GetRotationMatrix(mutil::Vector3 eulerAngles) {
-        float a = eulerAngles.x, b = eulerAngles.y, c = eulerAngles.z;
-        return mutil::Matrix3{
-            cos(a) * cos(c) - sin(a) * cos(b) * sin(c), -cos(a) * sin(c) - sin(a) * cos(b) * cos(c),  sin(a) * sin(b),
-            sin(a) * cos(c) + cos(a) * cos(b) * sin(c), -sin(a) * sin(c) + cos(a) * cos(b) * cos(c), -cos(a) * sin(b),
-            sin(b) * sin(c), sin(b) * cos(c), cos(b)
-        }.inverse();
+    float GetLidarVarCoef() const {
+        return Lidar->GetVarCoef();
     }
 };
 
-class TRobotGenerator {
+class TRobotBuilder {
 private:
+    float Speed = 0.1;
+    mutil::Vector3 Position = {};
+    mutil::Vector3 EulerAngles = {};
+    mutil::Vector3 ForwardDirection = {1, 0, 0};
     std::unique_ptr<ILidar> Lidar;
+    float PositionVarCoef = 0.1;
+    float AnglesVarCoef = 0.1;
 
 public:
-    explicit TRobotGenerator(std::unique_ptr<ILidar> lidar) : Lidar(std::move(lidar)) {}
+    explicit TRobotBuilder(std::unique_ptr<ILidar> lidar) : Lidar(std::move(lidar)) {}
 
-    TRobot Generate(mutil::Vector3 position = {}) {
-        return {position, std::move(Lidar)};
+    TRobotBuilder& SetSpeed(float speed) {
+        Speed = speed;
+        return *this;
+    }
+
+    TRobotBuilder& SetPosition(mutil::Vector3 position) {
+        Position = std::move(position);
+        return *this;
+    }
+
+    TRobotBuilder& SetEulerAngles(mutil::Vector3 eulerAngles) {
+        EulerAngles = std::move(eulerAngles);
+        return *this;
+    }
+
+    TRobotBuilder& SetForwardDirection(mutil::Vector3 forwardDirection) {
+        ForwardDirection = std::move(forwardDirection);
+        return *this;
+    }
+
+    TRobotBuilder& SetPositionVarCoef(float positionVarCoef) {
+        if (positionVarCoef < 0) {
+            throw std::invalid_argument("PositionVarCoef must be not less then 0");
+        }
+        PositionVarCoef = positionVarCoef;
+        return *this;
+    }
+
+    TRobotBuilder& SetAnglesVarCoef(float anglesVarCoef) {
+        if (anglesVarCoef < 0) {
+            throw std::invalid_argument("AnglesVarCoef must be not less then 0");
+        }
+        AnglesVarCoef = anglesVarCoef;
+        return *this;
+    }
+
+    TRobot Build() {
+        return {
+            std::move(Position),
+            std::move(Lidar),
+            Speed,
+            std::move(EulerAngles),
+            std::move(ForwardDirection),
+            PositionVarCoef,
+            AnglesVarCoef
+        };
     }
 };
