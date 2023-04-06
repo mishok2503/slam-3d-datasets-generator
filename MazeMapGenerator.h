@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "Map.h"
 #include "CubeMapGenerator.h"
 
