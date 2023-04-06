@@ -7,7 +7,7 @@
 
 int main() {
     constexpr TMapSize MAP_SIZE{9, 9, 5};
-    constexpr unsigned STEPS_COUNT = 600;
+    constexpr unsigned STEPS_COUNT = 10;
     constexpr unsigned LIDAR_POINTS_COUNT = 3000;
 
 

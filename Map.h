@@ -21,6 +21,10 @@ struct TMapSize {
     }
 };
 
+inline std::ostream& operator <<(std::ostream& os, const TMapSize& size) {
+    return os << size.X << ' ' << size.Y << ' ' << size.Z;
+}
+
 class TMap {
 public:
     using TRow = std::vector<TCell>;
@@ -48,6 +52,10 @@ public:
     [[nodiscard]] bool IsCellOccupied(unsigned x, unsigned y, unsigned z) const {
         Size.Check(x, y, z);
         return Map[x][y][z].isOccupied;
+    }
+
+    TMapSize getSize() const {
+        return Size;
     }
 
     [[nodiscard]] mutil::Vector3 GetFreeCell() const {
@@ -88,12 +96,26 @@ public:
         }
         return {TLidarPoint::Type::MAX, maxDepth};
     }
+
+private:
+    friend std::ostream& operator <<(std::ostream& os, const TMap& map);
 };
 
+inline std::ostream& operator <<(std::ostream& os, const TMap& map) {
+    os << map.Size << '\n';
+    for (const auto& plane : map.Map) {
+        for (const auto& row : plane) {
+            for (size_t i = 0; i < row.size(); ++i) {
+                os << row[i] << (i == row.size() - 1 ? '\n' : ' ');
+            }
+        }
+    }
+    return os;
+}
 
-class IMapGenerator {
-public:
-    virtual TMap Generate() = 0;
+    class IMapGenerator {
+    public:
+        virtual TMap Generate() = 0;
 
     virtual ~IMapGenerator() = default;
 };

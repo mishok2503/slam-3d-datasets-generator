@@ -14,8 +14,12 @@ void Simulator::Run(unsigned steps, std::ostream& dataOs, std::ostream& groundTr
         dataOs << v << '\n';
         groundTruthOs << v << '\n';
     };
+
     constexpr int SEED = 239;
     std::mt19937 randomGenerator{SEED};
+
+    groundTruthOs << Map << Robot.GetPosition() << ' ' << Robot.GetEulerAngles() << '\n';
+
     print(steps);
     for (int i = 0; i < steps; ++i) {
         auto pointsCloud = Robot.EmulateLidar(Map);

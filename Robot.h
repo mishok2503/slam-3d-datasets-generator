@@ -14,8 +14,8 @@ private:
     mutil::Vector3 ForwardDirection;
     std::unique_ptr<ILidar> Lidar;
 
-    float minDistance = INFINITY;
-    const float minAllowedDistance = 0.2;
+    float MinDistance = INFINITY;
+    const float MinAllowedDistance;
 
     static constexpr int SEED = 239;
     mutable std::mt19937 RandomGenerator{SEED};
@@ -28,25 +28,26 @@ public:
     TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed,
            mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection, float positionVarCoef, float anglesVarCoef) :
            Speed(speed), Position(position), EulerAngles(eulerAngles), RotationMatrix(GetRotationMatrixInv(eulerAngles)),
-           ForwardDirection(forwardDirection), Lidar(std::move(lidar)), PositionVarCoef(positionVarCoef), AnglesVarCoef(anglesVarCoef) {}
+           ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(2 * speed),
+           PositionVarCoef(positionVarCoef), AnglesVarCoef(anglesVarCoef) {}
 
     std::vector<TLidarPoint> EmulateLidar(const TMap &map) {
         std::vector<TLidarPoint> res;
         auto points = Lidar->GetPoints();
         res.reserve(points.size());
-        minDistance = INFINITY;
+        MinDistance = INFINITY;
         for (const auto &point: points) {
             auto dist = map.GetDistance(Position, RotationMatrix * point, Lidar->GetMaxDepth());
             res.push_back({dist.first, point * dist.second});
-            minDistance = std::min(minDistance, dist.second);
+            MinDistance = std::min(MinDistance, dist.second);
         }
         return res;
     }
 
     std::pair<mutil::Vector3, mutil::Vector3> Move(const TMap& map) {
         const auto prevAngles = EulerAngles;
-        if (minDistance < minAllowedDistance) {
-            const auto prevMinDistance = minDistance;
+        if (MinDistance < MinAllowedDistance) {
+            const auto prevMinDistance = MinDistance;
             const auto prevPosition = Position;
             while (true) {
                 EulerAngles = {
@@ -58,7 +59,7 @@ public:
                 Position += RotationMatrix * ForwardDirection * Speed;
                 EmulateLidar(map);
                 Position = prevPosition;
-                if (minDistance > prevMinDistance) {
+                if (MinDistance > prevMinDistance) {
                     break;
                 }
             }
@@ -69,6 +70,14 @@ public:
 
     float GetLidarVarCoef() const {
         return Lidar->GetVarCoef();
+    }
+
+    mutil::Vector3 GetPosition() const {
+        return Position;
+    }
+
+    mutil::Vector3 GetEulerAngles() const {
+        return EulerAngles;
     }
 };
 
