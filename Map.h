@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #include "Cell.h"
-#include "mutil.h"
+#include "mutil/mutil.h"
 #include "Lidar.h"
 
 struct TMapSize {
@@ -96,24 +96,10 @@ public:
         }
         return {TLidarPoint::Type::MAX, maxDepth};
     }
-
-private:
-    friend std::ostream& operator <<(std::ostream& os, const TMap& map);
 };
 
-inline std::ostream& operator <<(std::ostream& os, const TMap& map) {
-    os << map.Size << '\n';
-    for (const auto& plane : map.Map) {
-        for (const auto& row : plane) {
-            for (size_t i = 0; i < row.size(); ++i) {
-                os << row[i] << (i == row.size() - 1 ? '\n' : ' ');
-            }
-        }
-    }
-    return os;
-}
 
-    class IMapGenerator {
+class IMapGenerator {
     public:
         virtual TMap Generate() = 0;
 

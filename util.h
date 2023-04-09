@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mutil.h"
+#include "mutil/mutil.h"
 
 inline mutil::Matrix3 GetRotationMatrixInv(mutil::Vector3 eulerAngles) {
     float a = eulerAngles.x, b = eulerAngles.y, c = eulerAngles.z;

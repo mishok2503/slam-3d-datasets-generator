@@ -31,4 +31,8 @@ public:
     [[nodiscard]] float GetVarCoef() const override {
         return VarCoef;
     }
+
+    [[nodiscard]] unsigned GetPointsCount() const override {
+        return PointsCount;
+    }
 };

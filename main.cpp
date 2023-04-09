@@ -6,9 +6,9 @@
 #include <fstream>
 
 int main() {
-    constexpr TMapSize MAP_SIZE{9, 9, 5};
-    constexpr unsigned STEPS_COUNT = 10;
-    constexpr unsigned LIDAR_POINTS_COUNT = 3000;
+    constexpr TMapSize MAP_SIZE{3, 3, 3};
+    constexpr unsigned STEPS_COUNT = 2;
+    constexpr unsigned LIDAR_POINTS_COUNT = 10;
 
 
     std::unique_ptr<IMapGenerator> mapGenerator{new TMazeMapGenerator(MAP_SIZE)};
@@ -18,8 +18,8 @@ int main() {
 
     Simulator simulator(std::move(mapGenerator), std::move(robotBuilder));
 
-    std::ofstream dataFile("result.txt");
-    std::ofstream groundTruthFile("ground_truth.txt");
+    std::ofstream dataFile("result.json");
+    std::ofstream groundTruthFile("ground_truth.json");
     simulator.Run(STEPS_COUNT, dataFile, groundTruthFile);
 
     return 0;

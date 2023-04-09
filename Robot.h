@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mutil.h"
+#include "mutil/mutil.h"
 #include "Map.h"
 #include "Lidar.h"
 #include "util.h"
@@ -78,6 +78,10 @@ public:
 
     mutil::Vector3 GetEulerAngles() const {
         return EulerAngles;
+    }
+
+    unsigned GetLidarPointsCount() const {
+        return Lidar->GetPointsCount();
     }
 };
 
