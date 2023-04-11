@@ -26,7 +26,7 @@ public:
     }
 
     [[nodiscard]] virtual float GetMaxDepth() const = 0;
-    [[nodiscard]] virtual float GetVarCoef() const = 0;
+
     [[nodiscard]] virtual unsigned GetPointsCount() const = 0;
 
     virtual ~ILidar() = default;
