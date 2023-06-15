@@ -118,6 +118,18 @@ The data contained in both files:
 }
 ```
 
+## Test the result
+
+Install open3d library:
+```bash
+   pip install open3d
+```
+
+Run the visualization:
+```bash
+  python vizualize.py ground_truth.json
+```
+
 
 ## How it works
 

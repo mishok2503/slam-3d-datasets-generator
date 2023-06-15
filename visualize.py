@@ -1,3 +1,4 @@
+import sys
 import time
 from math import *
 import open3d
@@ -22,7 +23,7 @@ points = []
 pos = np.array([0., 0., 0.])
 rot = np.array([0., 0., 0.])
 k = rot_m(rot)
-with open("cmake-build-debug/ground_truth.json", "r") as file:
+with open(sys.argv[1], "r") as file:
     data = json.load(file)["data"]
     for measurement in data["measurements"]:
         points.append([])

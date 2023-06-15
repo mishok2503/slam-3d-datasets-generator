@@ -28,7 +28,6 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
         writer.StartArray();
     });
     for (int i = 0; i < steps; ++i) {
-        std::cerr << i << '\n';
         auto pointsCloud = Robot.EmulateLidar(Map);
         writeBoth([](TWriter &writer) {
             writer.StartObject(); // measurement elem
