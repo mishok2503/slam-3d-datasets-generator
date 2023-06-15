@@ -22,7 +22,7 @@ points = []
 pos = np.array([0., 0., 0.])
 rot = np.array([0., 0., 0.])
 k = rot_m(rot)
-with open("result.json", "r") as file:
+with open("cmake-build-debug/ground_truth.json", "r") as file:
     data = json.load(file)["data"]
     for measurement in data["measurements"]:
         points.append([])

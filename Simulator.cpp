@@ -1,7 +1,6 @@
 #include "Simulator.h"
 
 #include "util.h"
-#include "Robot.h"
 
 void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTruthOs) {
     rapidjson::StringBuffer dataStringBuffer;
@@ -16,9 +15,6 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
 
     writeBoth([](TWriter &writer) { writer.StartObject(); });
 
-    constexpr int SEED = 239;
-    std::mt19937 randomGenerator{SEED};
-
     writeMap(truthWriter, Map);
     writeRobot(truthWriter, "robot_start_position", Robot.GetPosition(), Robot.GetEulerAngles());
     ErrorModel->Write(truthWriter, "error_model");
@@ -32,6 +28,7 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
         writer.StartArray();
     });
     for (int i = 0; i < steps; ++i) {
+        std::cerr << i << '\n';
         auto pointsCloud = Robot.EmulateLidar(Map);
         writeBoth([](TWriter &writer) {
             writer.StartObject(); // measurement elem

@@ -12,7 +12,7 @@ private:
     [[nodiscard]] std::vector<mutil::Vector3> GetPointsImpl() const override {
         std::vector<mutil::Vector3> res(PointsCount);
 
-        const unsigned layersCount = sqrt(PointsCount) / 2;
+        const unsigned layersCount = sqrt(PointsCount) / 4;
         const float da = (UpAngle + DownAngle) / layersCount;
         const float db = 2 * M_PI * layersCount / PointsCount;
         float a = -DownAngle, b = 0;

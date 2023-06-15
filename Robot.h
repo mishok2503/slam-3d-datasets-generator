@@ -26,7 +26,7 @@ public:
            mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection) :
             Speed(speed), Position(position), EulerAngles(eulerAngles),
             RotationMatrix(GetRotationMatrixInv(eulerAngles)),
-            ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(2 * speed) {}
+            ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(200 * speed) {}
 
     std::vector<TLidarPoint> EmulateLidar(const TMap &map) {
         std::vector<TLidarPoint> res;
@@ -35,7 +35,7 @@ public:
         MinDistance = INFINITY;
         for (const auto &point: points) {
             auto dist = map.GetDistance(Position, RotationMatrix * point, Lidar->GetMaxDepth());
-            res.push_back({dist.first, point * dist.second});
+            res.push_back({dist.first, point * dist.second * 10});
             MinDistance = std::min(MinDistance, dist.second);
         }
         return res;
@@ -48,8 +48,9 @@ public:
             const auto prevPosition = Position;
             while (true) {
                 EulerAngles = {
-                        TwoPiDistribution(RandomGenerator),
-                        TwoPiDistribution(RandomGenerator),
+                        //TwoPiDistribution(RandomGenerator),
+                        //TwoPiDistribution(RandomGenerator),
+                        0, 0,
                         TwoPiDistribution(RandomGenerator)
                 };
                 RotationMatrix = GetRotationMatrixInv(EulerAngles);
