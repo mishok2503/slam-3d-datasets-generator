@@ -70,7 +70,7 @@ public:
     }
 
     [[nodiscard]] std::pair<TLidarPoint::Type, float> GetDistance(mutil::Vector3 pos, mutil::Vector3 dir, const float maxDepth) const {
-        constexpr float dt = 0.05;
+        constexpr float dt = 0.005;
         auto check = [this](mutil::Vector3 p) {
             for (int i=0; i < Size.X; ++i) {
                 if (p.x < i) break;
