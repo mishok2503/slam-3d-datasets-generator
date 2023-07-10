@@ -17,7 +17,7 @@ private:
     float MinDistance = INFINITY;
     const float MinAllowedDistance;
 
-    static constexpr int SEED = 239;
+    static constexpr int SEED = 241;
     mutable std::mt19937 RandomGenerator{SEED};
     std::uniform_real_distribution<float> TwoPiDistribution{0, 2 * M_PI};
 
