@@ -15,10 +15,6 @@ def rot_m(rotation):
     ])
 
 
-def r(f):
-    return np.array(list(map(float, f.readline().split())))
-
-
 points = []
 pos = np.array([0., 0., 0.])
 rot = np.array([0., 0., 0.])

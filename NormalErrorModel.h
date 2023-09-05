@@ -2,47 +2,37 @@
 
 #include "ErrorModel.h"
 
+#include "util.h"
+
 class TNormalErrorModel : public IErrorModel {
 private:
     const float PosCoef;
     const float RotCoef;
     const float LidarCoef;
-
-    static constexpr int SEED = 239;
-    mutable std::mt19937 RandomGenerator{SEED};
-
-    mutil::Vector3 AddVectorError(const mutil::Vector3 &delta, const float coef) const {
-        float variance = coef;
-        std::normal_distribution<float> normalDistribution{0, variance};
-        return delta + mutil::Vector3{
-                normalDistribution(RandomGenerator),
-                normalDistribution(RandomGenerator),
-                normalDistribution(RandomGenerator)
-        };
-    }
+    const float QualityCoef;
 
 public:
-    TNormalErrorModel(float posCoef, float rotCoef, float lidarCoef) : PosCoef(posCoef), RotCoef(rotCoef),
-                                                                       LidarCoef(lidarCoef) {}
+    TNormalErrorModel(float posCoef, float rotCoef, float lidarCoef, float qualityCoef) :
+            PosCoef(posCoef), RotCoef(rotCoef), LidarCoef(lidarCoef), QualityCoef(qualityCoef) {}
 
-    mutil::Vector3 AddPositionError(const mutil::Vector3 &posDelta) const override {
-        return AddVectorError(posDelta, RotCoef);
+    [[nodiscard]] mutil::Vector3 AddPositionError(const mutil::Vector3 &posDelta) const override {
+        return AddVectorError(posDelta, RotCoef, false);
     }
 
-    mutil::Vector3 AddRotationError(const mutil::Vector3 &rotDelta) const override {
+    [[nodiscard]] mutil::Vector3 AddRotationError(const mutil::Vector3 &rotDelta) const override {
         auto result = rotDelta;
         for (int i = 0; i < 3; ++i) {
             float variance = std::abs(rotDelta[i] * RotCoef);
-            result[i] += std::normal_distribution<float>{0, variance}(RandomGenerator);
+            result[i] += std::normal_distribution<float>{0, variance}(GetRandGen());
         }
         return result;
     }
 
-    mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
-        return AddVectorError(point, LidarCoef * (1 + (1 - quality) * 10));
+    [[nodiscard]] mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
+        return AddVectorError(point, LidarCoef * (1 + (1 - quality) * QualityCoef), false);
     }
 
-    virtual void Write(TWriter &writer, const char *key) const override {
+    void Write(TWriter &writer, const char *key) const override {
         writer.Key(key);
         writer.StartObject();
         writer.Key("type");

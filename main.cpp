@@ -17,7 +17,6 @@ int main() {
 
 
     std::unique_ptr<IMapGenerator> mapGenerator{new TMazeMapGenerator(MAP_SIZE)};
-//    std::unique_ptr<ILidar> lidar{new TOneBeamLidar({1, 0, 0}, 15)};
     std::unique_ptr<ILidar> lidar{new TSimpleLidar(LIDAR_POINTS_COUNT, 15)};
     std::unique_ptr<TRobotBuilder> robotBuilder{new TRobotBuilder(std::move(lidar))};
     robotBuilder->SetSpeed(0.1);

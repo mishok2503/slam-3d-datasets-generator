@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ErrorModel.h"
+
+#include <utility>
 #include "util.h"
 
 class TUniformErrorModel : public IErrorModel {
@@ -8,9 +10,6 @@ public:
     using TErrorFunction = std::function<float(float)>;
 
 private:
-    static constexpr int SEED = 239;
-    mutable std::mt19937 RandomGenerator{SEED};
-
     mutable std::uniform_real_distribution<float> AngleDistribution;
     mutable std::uniform_real_distribution<float> PositionDistribution;
 
@@ -18,24 +17,22 @@ private:
     TErrorFunction ErrorFromTheta; // from 0 to PI
     TErrorFunction ErrorFromPhi; // from -PI to PI
 
-    mutil::Vector3
-    AddUniformError(const mutil::Vector3 &vec, std::uniform_real_distribution<float> &distribution) const {
-        auto result = vec;
+    static mutil::Vector3 AddUniformError(mutil::Vector3 vec, std::uniform_real_distribution<float> &distribution) {
         for (int i = 0; i < 3; ++i) {
-            result[i] += distribution(RandomGenerator);
+            vec[i] += distribution(GetRandGen());
         }
-        return result;
+        return vec;
     }
 
-    float ApplyErrorFunction(float value, const TErrorFunction &func) const {
+    static float ApplyErrorFunction(float value, const TErrorFunction &func) {
         float error = func(value);
-        return value + std::uniform_real_distribution<float>{-error, error}(RandomGenerator);
+        return value + std::uniform_real_distribution<float>{-error, error}(GetRandGen());
     }
 
 public:
     TUniformErrorModel(float rotError, float posError, TErrorFunction errorFromRadius, TErrorFunction errorFromTheta, TErrorFunction errorFromPhi)
             : AngleDistribution(-rotError, rotError), PositionDistribution(-posError, posError),
-              ErrorFromRadius(errorFromRadius), ErrorFromPhi(errorFromPhi), ErrorFromTheta(errorFromTheta) {}
+              ErrorFromRadius(std::move(errorFromRadius)), ErrorFromPhi(std::move(errorFromPhi)), ErrorFromTheta(std::move(errorFromTheta)) {}
 
     mutil::Vector3 AddPositionError(const mutil::Vector3 &posDelta) const override {
         return AddUniformError(posDelta, PositionDistribution);
@@ -59,7 +56,7 @@ public:
         };
     }
 
-    virtual void Write(TWriter &writer, const char *key) const override {
+    void Write(TWriter &writer, const char *key) const override {
         writer.Key(key);
         writer.StartObject();
         writer.Key("type");
