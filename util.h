@@ -9,13 +9,13 @@
 
 using TWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 
-inline mutil::Matrix3 GetRotationMatrixInv(mutil::Vector3 eulerAngles) {
+inline mutil::Matrix3 GetRotationMatrix(mutil::Vector3 eulerAngles) {
     float a = eulerAngles.x, b = eulerAngles.y, c = eulerAngles.z;
     return mutil::Matrix3{
             cos(a) * cos(c) - sin(a) * cos(b) * sin(c), -cos(a) * sin(c) - sin(a) * cos(b) * cos(c),  sin(a) * sin(b),
             sin(a) * cos(c) + cos(a) * cos(b) * sin(c), -sin(a) * sin(c) + cos(a) * cos(b) * cos(c), -cos(a) * sin(b),
             sin(b) * sin(c), sin(b) * cos(c), cos(b)
-    }.inverse();
+    };
 }
 
 inline void writeKeyInt(TWriter &writer, const char *key, int value) {

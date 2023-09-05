@@ -8,7 +8,7 @@ import json
 
 def rot_m(rotation):
     a, b, c = rotation
-    return np.linalg.inv([
+    return np.array([
         [cos(a) * cos(c) - sin(a) * cos(b) * sin(c), -cos(a) * sin(c) - sin(a) * cos(b) * cos(c), sin(a) * sin(b)],
         [sin(a) * cos(c) + cos(a) * cos(b) * sin(c), -sin(a) * sin(c) + cos(a) * cos(b) * cos(c), -cos(a) * sin(b)],
         [sin(b) * sin(c), sin(b) * cos(c), cos(b)]
@@ -44,10 +44,13 @@ vis = open3d.visualization.Visualizer()
 vis.create_window()
 vis.add_geometry(pcd)
 
-while True:
+run = True
+while run:
     for p in points:
         vis.update_geometry(pcd)
-        vis.poll_events()
+        run = vis.poll_events()
+        if not run:
+            break
         vis.update_renderer()
         pcd.points = open3d.utility.Vector3dVector(p)
-        time.sleep(0.04)
+        time.sleep(0.03)

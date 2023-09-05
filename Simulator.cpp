@@ -1,6 +1,15 @@
 #include "Simulator.h"
 
+#include <array>
+
 #include "util.h"
+
+namespace {
+    constexpr int SEED = 239;
+    std::mt19937 randomGenerator{SEED};
+    std::array<float, 4> qualities = {1, 1, 1, 0.1};
+    std::uniform_int_distribution<int> choice{0, qualities.size() - 1};
+}
 
 void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTruthOs) {
     rapidjson::StringBuffer dataStringBuffer;
@@ -39,13 +48,15 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
                 writer.StartObject(); // lidar_data elem
                 writePointType(writer, point.type);
             });
-            auto pointWithError = ErrorModel->AddLidarError(point.data);
+            float quality = qualities[choice(randomGenerator)];
+            auto pointWithError = ErrorModel->AddLidarError(point.data, quality);
             writeVector3(truthWriter, "coordinates", point.data);
             writeVector3(dataWriter, "coordinates", pointWithError);
+            writeBoth([quality](TWriter &writer) { writeKeyDouble(writer, "quality", quality); });
             writeBoth([](TWriter &writer) { writer.EndObject(); }); // lidar_data elem
         }
         writeBoth([](TWriter &writer) { writer.EndArray(); }); // lidar_data
-        auto const&[pos, rot] = Robot.Move(Map);
+        auto const &[pos, rot] = Robot.Move(Map);
         auto posWithError = ErrorModel->AddPositionError(pos);
         auto rotWithError = ErrorModel->AddRotationError(rot);
         writeRobot(truthWriter, "odometry", pos, rot);

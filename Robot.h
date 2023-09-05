@@ -17,7 +17,7 @@ private:
     float MinDistance = INFINITY;
     const float MinAllowedDistance;
 
-    static constexpr int SEED = 241;
+    static constexpr int SEED = 143;
     mutable std::mt19937 RandomGenerator{SEED};
     std::uniform_real_distribution<float> TwoPiDistribution{0, 2 * M_PI};
 
@@ -25,7 +25,7 @@ public:
     TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed,
            mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection) :
             Speed(speed), Position(position), EulerAngles(eulerAngles),
-            RotationMatrix(GetRotationMatrixInv(eulerAngles)),
+            RotationMatrix(GetRotationMatrix(eulerAngles)),
             ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(2 * speed) {}
 
     std::vector<TLidarPoint> EmulateLidar(const TMap &map) {
@@ -48,12 +48,12 @@ public:
             const auto prevPosition = Position;
             while (true) {
                 EulerAngles = {
-                        //TwoPiDistribution(RandomGenerator),
-                        //TwoPiDistribution(RandomGenerator),
+//                        TwoPiDistribution(RandomGenerator),
+//                        TwoPiDistribution(RandomGenerator),
                         0, 0,
                         TwoPiDistribution(RandomGenerator)
                 };
-                RotationMatrix = GetRotationMatrixInv(EulerAngles);
+                RotationMatrix = GetRotationMatrix(EulerAngles);
                 Position += RotationMatrix * ForwardDirection * Speed;
                 EmulateLidar(map);
                 Position = prevPosition;

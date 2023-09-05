@@ -9,7 +9,7 @@ public:
 
     virtual mutil::Vector3 AddRotationError(const mutil::Vector3 &rotDelta) const = 0;
 
-    virtual mutil::Vector3 AddLidarError(const mutil::Vector3 &point) const = 0;
+    virtual mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const = 0;
 
     virtual void Write(TWriter &writer, const char *key) const = 0;
 

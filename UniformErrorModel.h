@@ -45,7 +45,7 @@ public:
         return AddUniformError(rotDelta, AngleDistribution);
     }
 
-    mutil::Vector3 AddLidarError(const mutil::Vector3 &point) const override {
+    mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
         auto r = point.length();
         float theta = std::atan2f(std::hypot(point.x, point.y), point.z);
         float phi = std::atan2f(point.y, point.x);

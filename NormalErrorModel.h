@@ -12,7 +12,7 @@ private:
     mutable std::mt19937 RandomGenerator{SEED};
 
     mutil::Vector3 AddVectorError(const mutil::Vector3 &delta, const float coef) const {
-        float variance = delta.length() * coef;
+        float variance = coef;
         std::normal_distribution<float> normalDistribution{0, variance};
         return delta + mutil::Vector3{
                 normalDistribution(RandomGenerator),
@@ -38,8 +38,8 @@ public:
         return result;
     }
 
-    mutil::Vector3 AddLidarError(const mutil::Vector3 &point) const override {
-        return AddVectorError(point, LidarCoef);
+    mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
+        return AddVectorError(point, LidarCoef * (1 + (1 - quality) * 10));
     }
 
     virtual void Write(TWriter &writer, const char *key) const override {
