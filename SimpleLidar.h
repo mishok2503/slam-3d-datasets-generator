@@ -17,7 +17,7 @@ private:
         const float db = 2 * M_PI * layersCount / PointsCount;
         float a = -DownAngle, b = 0;
         for (auto &point: res) {
-            point = {sin(b) * cos(a), cos(b) * cos(a), sin(a)}; // maybe swap x, y
+            point = {sin(b) * cos(a), cos(b) * cos(a), sin(a)};
             b += db;
             if (b > 2 * M_PI) {
                 b = 0;

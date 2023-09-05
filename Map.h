@@ -11,6 +11,9 @@
 #include "mutil/mutil.h"
 #include "Lidar.h"
 
+std::mt19937& GetRandGen();
+
+
 struct TMapSize {
     const unsigned X, Y, Z;
 
@@ -34,8 +37,6 @@ private:
     TMapData Map;
     TMapSize Size;
 
-    static constexpr int SEED = 239;
-    mutable std::mt19937 RandomGenerator{SEED};
     mutable std::uniform_int_distribution<unsigned> XDistribution;
     mutable std::uniform_int_distribution<unsigned> YDistribution;
     mutable std::uniform_int_distribution<unsigned> ZDistribution;
@@ -60,9 +61,9 @@ public:
 
     [[nodiscard]] mutil::Vector3 GetFreeCell() const {
         while (true) {
-            unsigned x = XDistribution(RandomGenerator);
-            unsigned y = YDistribution(RandomGenerator);
-            unsigned z = ZDistribution(RandomGenerator);
+            unsigned x = XDistribution(GetRandGen());
+            unsigned y = YDistribution(GetRandGen());
+            unsigned z = ZDistribution(GetRandGen());
             if (!Map[x][y][z].isOccupied) {
                 return {x + 0.5f, y + 0.5f, z + 0.5f};
             }
@@ -100,8 +101,7 @@ public:
 
 
 class IMapGenerator {
-    public:
-        virtual TMap Generate() = 0;
-
+public:
+    virtual TMap Generate() = 0;
     virtual ~IMapGenerator() = default;
 };

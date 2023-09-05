@@ -8,18 +8,22 @@ private:
     const mutil::Vector3 Direction;
 
     [[nodiscard]] std::vector<mutil::Vector3> GetPointsImpl() const override {
-        return {Direction, {cos(0.3f), sin(0.3f), 0}, {cos(-0.3f), sin(-0.3f), 0}};
+        return {
+            {1, 0, 0},
+            {0, 1, 0},
+            {-1, 0, 0},
+            {0, -1, 0}
+        };
     }
 
 public:
-    TOneBeamLidar(mutil::Vector3 direction, float maxDepth) : Direction(std::move(direction)),
-                                                              MaxDepth(maxDepth) {}
+    TOneBeamLidar(float maxDepth) : MaxDepth(maxDepth) {}
 
     [[nodiscard]] float GetMaxDepth() const override {
         return MaxDepth;
     }
 
     [[nodiscard]] unsigned GetPointsCount() const override {
-        return 3u;
+        return 4u;
     }
 };

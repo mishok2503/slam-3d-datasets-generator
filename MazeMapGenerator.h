@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include "util.h"
 #include "Map.h"
 #include "CubeMapGenerator.h"
 
@@ -9,8 +10,6 @@ class TMazeMapGenerator : public IMapGenerator {
 private:
     const TMapSize Size;
 
-    static constexpr int SEED = 239;
-    std::mt19937 RandomGenerator{SEED};
     const std::array<std::pair<int, int>, 4> Directions = {{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}};
 
 public:
@@ -23,7 +22,7 @@ public:
         std::function<void(unsigned, unsigned)> dfs = [&](unsigned x, unsigned y) {
             maze[x][y] = true;
             auto directions = Directions;
-            std::shuffle(directions.begin(), directions.end(), RandomGenerator);
+            std::shuffle(directions.begin(), directions.end(), GetRandGen());
             for (auto [dx, dy] : directions) {
                 unsigned nx = x + 2 * dx;
                 unsigned ny = y + 2 * dy;

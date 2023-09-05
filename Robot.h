@@ -17,8 +17,6 @@ private:
     float MinDistance = INFINITY;
     const float MinAllowedDistance;
 
-    static constexpr int SEED = 143;
-    mutable std::mt19937 RandomGenerator{SEED};
     std::uniform_real_distribution<float> TwoPiDistribution{0, 2 * M_PI};
 
 public:
@@ -43,38 +41,35 @@ public:
 
     std::pair<mutil::Vector3, mutil::Vector3> Move(const TMap &map) {
         const auto prevAngles = EulerAngles;
-        if (MinDistance < MinAllowedDistance) {
+        if (MinDistance < MinAllowedDistance) { // if close to wall - change direction
             const auto prevMinDistance = MinDistance;
             const auto prevPosition = Position;
-            while (true) {
+            while (MinDistance <= prevMinDistance) { // make rotation to move away from the wall
                 EulerAngles = {
-//                        TwoPiDistribution(RandomGenerator),
-//                        TwoPiDistribution(RandomGenerator),
+//                        TwoPiDistribution(GetRandGen()),
+//                        TwoPiDistribution(GetRandGen()),
                         0, 0,
-                        TwoPiDistribution(RandomGenerator)
+                        TwoPiDistribution(GetRandGen())
                 };
                 RotationMatrix = GetRotationMatrix(EulerAngles);
                 Position += RotationMatrix * ForwardDirection * Speed;
                 EmulateLidar(map);
                 Position = prevPosition;
-                if (MinDistance > prevMinDistance) {
-                    break;
-                }
             }
         }
         Position += RotationMatrix * ForwardDirection * Speed;
-        return {ForwardDirection * Speed, EulerAngles - prevAngles};
+        return {ForwardDirection * Speed, EulerAngles - prevAngles}; // return odometry
     }
 
-    mutil::Vector3 GetPosition() const {
+    [[nodiscard]] mutil::Vector3 GetPosition() const {
         return Position;
     }
 
-    mutil::Vector3 GetEulerAngles() const {
+    [[nodiscard]] mutil::Vector3 GetEulerAngles() const {
         return EulerAngles;
     }
 
-    unsigned GetLidarPointsCount() const {
+    [[nodiscard]] unsigned GetLidarPointsCount() const {
         return Lidar->GetPointsCount();
     }
 };

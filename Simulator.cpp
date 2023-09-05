@@ -5,9 +5,7 @@
 #include "util.h"
 
 namespace {
-    constexpr int SEED = 239;
-    std::mt19937 randomGenerator{SEED};
-    std::array<float, 4> qualities = {1, 1, 1, 0.1};
+    std::array<float, 4> qualities = {1, 1, 1, 0.1}; // TODO: move to ErrorModel
     std::uniform_int_distribution<int> choice{0, qualities.size() - 1};
 }
 
@@ -48,7 +46,7 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
                 writer.StartObject(); // lidar_data elem
                 writePointType(writer, point.type);
             });
-            float quality = qualities[choice(randomGenerator)];
+            float quality = qualities[choice(GetRandGen())];
             auto pointWithError = ErrorModel->AddLidarError(point.data, quality);
             writeVector3(truthWriter, "coordinates", point.data);
             writeVector3(dataWriter, "coordinates", pointWithError);

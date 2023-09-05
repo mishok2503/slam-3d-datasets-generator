@@ -43,12 +43,15 @@ public:
     }
 
     mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
+        // translate to the spherical coordinate system
         auto r = point.length();
         float theta = std::atan2f(std::hypot(point.x, point.y), point.z);
         float phi = std::atan2f(point.y, point.x);
+        // apply error
         r = ApplyErrorFunction(r, ErrorFromRadius);
         theta = ApplyErrorFunction(theta, ErrorFromTheta);
         phi = ApplyErrorFunction(phi, ErrorFromPhi);
+        // translate back
         return r * mutil::Vector3{
                 std::sin(theta) * std::cos(phi),
                 std::sin(theta) * std::sin(phi),

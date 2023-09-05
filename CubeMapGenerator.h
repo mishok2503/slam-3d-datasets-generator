@@ -8,7 +8,7 @@ private:
 
 public:
     TMap Generate() override {
-        auto res = TMap{Size};
+        auto res = TMap{Size}; // TODO: use isFilled param
         for (unsigned i = 0; i < Size.X; ++i) {
             for (unsigned j = 0; j < Size.Y; ++j) {
                 for (unsigned k = 0; k < Size.Z; ++k) {
@@ -18,10 +18,6 @@ public:
                 }
             }
         }
-        res.SetCell(2, 2, 2, true);
-        res.SetCell(2, 3, 2, true);
-        res.SetCell(3, 2, 2, true);
-        res.SetCell(2, 2, 3, true);
         return res;
     }
 

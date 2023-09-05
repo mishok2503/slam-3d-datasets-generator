@@ -14,7 +14,7 @@ private:
 
         float a = 0;
         for (auto &point: res) {
-            point = {sin(a), cos(a), 0}; // maybe swap x, y
+            point = {sin(a), cos(a), 0};
             a += da;
         }
         return res;
