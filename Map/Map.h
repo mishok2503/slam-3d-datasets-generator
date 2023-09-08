@@ -9,7 +9,7 @@
 
 #include "Cell.h"
 #include "mutil/mutil.h"
-#include "Lidar.h"
+#include "Lidar/Lidar.h"
 
 std::mt19937& GetRandGen();
 

@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "util.h"
+#include "Util.h"
 
 namespace {
     std::array<float, 4> qualities = {1, 1, 1, 0.1}; // TODO: move to ErrorModel

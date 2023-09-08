@@ -1,12 +1,12 @@
 #include "Simulator.h"
 #include "Map/MazeMapGenerator.h"
 #include "Robot.h"
-#include "Lidar/SimpleLidar.h"
-#include "Lidar/Lidar2D.h"
-#include "Lidar/OneBeamLidar.h"
-#include "ErrorModel/UniformErrorModel.h"
-#include "ErrorModel/NormalErrorModel.h"
-#include "ErrorModel/ErrorModel2D.h"
+#include "Lidar/Simple.h"
+#include "Lidar/Plain.h"
+#include "Lidar/OneBeam.h"
+#include "ErrorModel/Uniform.h"
+#include "ErrorModel/Normal.h"
+#include "ErrorModel/Plain.h"
 
 #include <fstream>
 
