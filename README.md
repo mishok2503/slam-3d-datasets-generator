@@ -2,30 +2,37 @@
 
 This repository contains the source code for a dataset generator used for testing SLAM algorithms. This generator allows you to generate 3D data in json format, and also allows you to configure some data parameters, such as the map model, lidar type and error model.
 
-## Installation
+## Usage
 
 To use the dataset generator, follow these steps:
 
-1. Clone the repository:
+#### Clone the repository:
 
-   ```bash
-   git clone https://github.com/mishok2503/slam-3d-datasets-generator.git
-   ```
+```bash
+git clone https://github.com/mishok2503/slam-3d-datasets-generator.git
+cd slam-3d-datasets-generator
+```
 
-2. Build
-   ```bash
-    cd slam-3d-datasets-generator
-    cmake .
-    make
-   ```
+#### Build
+
+```bash
+mkdir -p build && cd build
+cmake ..
+make
+cp ../visualize.py .
+```
    
-3. Run
+#### Run
    
-    ```bash
-    ./generator
-    ```
+```bash
+./generator [output-file]
+```
 
-You will get two files `result.json` and `ground_truth.json` that contain the result of the generator.
+Default `output-file` name is `"result.json"`.
+
+You will get two files:
+1. `gt_"output-file"` - contains the result of the generator without errors (ground_truth).
+2. `"output-file"` - same, but with errors.
 
 ## Settings
 
@@ -33,7 +40,7 @@ To configure the generator, you need to change the `main.cpp` file, which contai
 
 ## Code Documentation
 
-The provided code is a C++ program that simulates a robot navigating through a maze-like environment. It generates data files containing trajectory information and ground truth data. This documentation will provide an overview of the variables used in the code.
+This part will provide an overview of the variables used in the code.
 
 ### Variables:
 
@@ -44,7 +51,7 @@ The provided code is a C++ program that simulates a robot navigating through a m
 
 2. `STEPS_COUNT`:
     - Specifies the number of steps the robot will take in the simulation.
-    - Example: `80000`
+    - Example: `800`
 
 3. `LIDAR_POINTS_COUNT`:
     - Indicates the number of lidar points the robot will take in each step.
@@ -127,7 +134,7 @@ Install open3d library:
 
 Run the visualization:
 ```bash
-  python vizualize.py ground_truth.json
+  python vizualize.py <output-file>
 ```
 
 

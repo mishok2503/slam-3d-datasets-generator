@@ -10,9 +10,9 @@
 
 #include <fstream>
 
-int main() {
+int main(int argc, char* argv[]) {
     constexpr TMapSize MAP_SIZE{7, 7, 5};
-    constexpr unsigned STEPS_COUNT = 501;
+    constexpr unsigned STEPS_COUNT = 50;
     constexpr unsigned LIDAR_POINTS_COUNT = 2000;
 
 
@@ -32,8 +32,12 @@ int main() {
 
     Simulator simulator(std::move(mapGenerator), std::move(robotBuilder), std::move(errorModel));
 
-    std::ofstream dataFile("result.json");
-    std::ofstream groundTruthFile("ground_truth.json");
+    std::string outputFilename = "result.json";
+    if (argc >= 2) {
+        outputFilename = argv[1];
+    }
+    std::ofstream dataFile(outputFilename);
+    std::ofstream groundTruthFile("gt_" + outputFilename);
     simulator.Run(STEPS_COUNT, dataFile, groundTruthFile);
 
     return 0;
