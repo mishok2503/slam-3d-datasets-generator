@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Map.h"
+#include "Map/Map.h"
 #include "Robot.h"
-#include "ErrorModel.h"
+#include "ErrorModel/ErrorModel.h"
 
 class Simulator {
 private:

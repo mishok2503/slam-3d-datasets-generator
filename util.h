@@ -4,7 +4,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "Lidar.h"
+#include "Lidar/Lidar.h"
 
 using TWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 

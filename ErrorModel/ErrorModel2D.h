@@ -2,6 +2,7 @@
 
 #include "ErrorModel.h"
 
+#include <functional>
 #include "util.h"
 
 template<bool IsLidar2D = false>

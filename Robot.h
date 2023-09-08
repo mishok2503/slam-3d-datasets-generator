@@ -1,8 +1,8 @@
 #pragma once
 
 #include "mutil/mutil.h"
-#include "Map.h"
-#include "Lidar.h"
+#include "Map/Map.h"
+#include "Lidar/Lidar.h"
 #include "util.h"
 
 class TRobot {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <functional>
+#include "CubeMapGenerator.h"
 
+#include <functional>
 #include "util.h"
 #include "Map.h"
-#include "CubeMapGenerator.h"
 
 class TMazeMapGenerator : public IMapGenerator {
 private:
