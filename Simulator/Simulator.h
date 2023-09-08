@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Map/Map.h"
-#include "Robot.h"
+#include "Robot/Robot.h"
 #include "ErrorModel/ErrorModel.h"
 
 class Simulator {

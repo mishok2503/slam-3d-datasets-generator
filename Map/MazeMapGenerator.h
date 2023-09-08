@@ -3,7 +3,7 @@
 #include "CubeMapGenerator.h"
 
 #include <functional>
-#include "Util.h"
+#include "Util/Math.h"
 #include "Map.h"
 
 class TMazeMapGenerator : public IMapGenerator {

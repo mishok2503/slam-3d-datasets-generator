@@ -3,7 +3,8 @@
 #include "ErrorModel.h"
 
 #include <functional>
-#include "Util.h"
+#include "Util/Math.h"
+#include "Util/Json.h"
 
 template<bool IsLidar2D = false>
 class TErrorModel2D : public IErrorModel {

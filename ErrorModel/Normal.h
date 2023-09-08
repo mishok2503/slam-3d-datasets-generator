@@ -2,7 +2,8 @@
 
 #include "ErrorModel.h"
 
-#include "Util.h"
+#include "Util/Math.h"
+#include "Util/Json.h"
 
 class TNormalErrorModel : public IErrorModel {
 private:

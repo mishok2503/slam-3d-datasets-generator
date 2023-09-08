@@ -1,6 +1,6 @@
-#include "Simulator.h"
+#include "Simulator/Simulator.h"
 #include "Map/MazeMapGenerator.h"
-#include "Robot.h"
+#include "Robot/Robot.h"
 #include "Lidar/Simple.h"
 #include "Lidar/Plain.h"
 #include "Lidar/OneBeam.h"
