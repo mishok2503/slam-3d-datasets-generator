@@ -12,7 +12,8 @@ struct TLidarPoint {
     };
 
     Type type = UNKNOWN;
-    mutil::Vector3 data;
+    mutil::Vector3 Data;
+    float Quality = 1;
 };
 
 class ILidar {

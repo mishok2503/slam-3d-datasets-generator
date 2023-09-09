@@ -45,37 +45,74 @@ This part will provide an overview of the variables used in the code.
 ### Variables:
 
 1. `MAP_SIZE`:
-    - Represents the size of the map in three dimensions.
-    - Format: {x, y, z}
-    - Example: {7, 7, 7}
+   - Represents the size of the map in three dimensions.
+   - Format: {x, y, z}
+   - Example: {7, 7, 7}
 
 2. `STEPS_COUNT`:
-    - Specifies the number of steps the robot will take in the simulation.
-    - Example: `800`
+   - Specifies the number of steps the robot will take in the simulation.
+   - Example: `800`
 
 3. `LIDAR_POINTS_COUNT`:
-    - Indicates the number of lidar points the robot will take in each step.
-    - Example: `1500`
+   - Indicates the number of lidar points the robot will take in each step.
+   - Example: `1500`
 
-4. `mapGenerator`:
-    - Variable responsible for the map generation model.
-    - Example: `TMazeMapGenerator(MAP_SIZE)` or `TCubeMapGenerator(MAP_SIZE)`
+4. `LIDAR_MAX_DEPTH`:
+   - Indicates the maximum distance that the laser can measure, if the distance is greater than the point type will be `MAX`
 
-5. `lidar`:
+5. `mapGenerator`:
+   - Variable responsible for the map generation model.
+   - Example: `TMazeMapGenerator(MAP_SIZE)` or `TCubeMapGenerator(MAP_SIZE)`
+6. `lidar`:
     - Variable responsible for the type of lidar.
-    - Example: `TSimpleLidar(LIDAR_POINTS_COUNT, /*max depth*/ 15)` or `TFibonacciLidar(LIDAR_POINTS_COUNT, 15)`
+    - Example: `TSimpleLidar(LIDAR_POINTS_COUNT, LIDAR_MAX_DEPTH)` or `TFibonacciLidar(LIDAR_POINTS_COUNT, LIDAR_MAX_DEPTH)`
 
-6. `robotBuilder`:
+7. `robotBuilder`:
     - A pointer to the robot builder object responsible for constructing the robot with the specified lidar.
     - Example: `TRobotBuilder(std::move(lidar))`
 
-7. `errorModel`:
-    - A pointer to the error model object representing the error applied to lidar measurements.
-    - Example: `TUniformErrorModel(0.02, 0.05, errorFromRadius, errorFromTheta, errorFromPhi)`
-      - The first two parameters are responsible for the error boundaries for odometry - position and rotation, respectively.
-      - the remaining parameters of this function, which return the boundary of a uniform distribution over the spherical coordinates of the point - radius, theta and phi, respectively.
+8. `errorModel`:
+    - A pointer to the error model object representing the error applied to lidar measurements and odometry.
+    - Examples:
+      - ```C++
+        std::unique_ptr<IErrorModel> errorModel{
+            new TSphericalUniformErrorModel(
+                /*** Odometry ***/
+                // the boundary of the uniform distribution for the robot position
+                // that is, a random variable from a uniform distribution [-0.02; 0.02] is added to the robot's odometry for each coordinate
+                0.02,
+                // same for orientation
+                0.05,
+                /*** Lidar ***/
+                // functions return boundaries for uniform distribution
+                // for example, if the distance (radius) to the point is 10,
+                // then at the resulting point the radius will be in [10 - 0.2; 10 + 0.2]
+                [](float r) { return r / 50; },
+                // in this function, the error does not depend on the angle and at the resulting point,
+                // the value of the theta angle will differ from the original by +-0.01
+                [](float theta) { return 0.01; },
+                [](float phi) { return 0.02; }
+        )};
+        ```
+      - ```C++
+        std::unique_ptr<TErrorModel2D<false>> errorModel{
+            new TErrorModel2D<false>( // the second parameter is whether the lidar error is two-dimensional
+                0.02, // variance for position error
+                0.001, // variance for orientation error
+                0.005 // variance for lidar point position
+        )};
+        // function for setting the quality distribution
+        // with a probability of 80%, the quality will be 1, otherwise 0.1
+        errorModel->SetQualityFunction([](float x) {
+            return x < 0.8 ? 1.f : 0.1f;
+        });
+        // the coefficient indicates how much the quality affects the error
+        // the formula by which the variance is recalculated: variance * (1 + (1 - quality) * QualityCoef)
+        // in this example, if the measurement quality of the point is 0.1, then the error variance will be 28 times greater
+        errorModel->SetQualityCoef(30);
+        ```
 
-8. `simulator`:
+9. `simulator`:
     - An instance of the Simulator class that orchestrates the simulation process using the provided map, robot, and error model objects.
 
 
@@ -124,6 +161,9 @@ The data contained in both files:
   }
 }
 ```
+
+Note that the robot **firstly rotates** and writes the odometry of the rotation
+and **only then moves** and writes the odometry of the position relative to the new orientation.
 
 ## Test the result
 

@@ -6,7 +6,7 @@
 #include "Util/Math.h"
 #include "Util/Json.h"
 
-class TUniformErrorModel : public IErrorModel {
+class TSphericalUniformErrorModel : public IErrorModel {
 public:
     using TErrorFunction = std::function<float(float)>;
 
@@ -31,7 +31,7 @@ private:
     }
 
 public:
-    TUniformErrorModel(float rotError, float posError, TErrorFunction errorFromRadius, TErrorFunction errorFromTheta, TErrorFunction errorFromPhi)
+    TSphericalUniformErrorModel(float rotError, float posError, TErrorFunction errorFromRadius, TErrorFunction errorFromTheta, TErrorFunction errorFromPhi)
             : AngleDistribution(-rotError, rotError), PositionDistribution(-posError, posError),
               ErrorFromRadius(std::move(errorFromRadius)), ErrorFromPhi(std::move(errorFromPhi)), ErrorFromTheta(std::move(errorFromTheta)) {}
 
@@ -43,7 +43,7 @@ public:
         return AddUniformError(rotDelta, AngleDistribution);
     }
 
-    mutil::Vector3 AddLidarError(const mutil::Vector3 &point, float quality) const override {
+    TLidarPoint AddLidarError(const mutil::Vector3 &point) const override {
         // translate to the spherical coordinate system
         auto r = point.length();
         float theta = std::atan2f(std::hypot(point.x, point.y), point.z);
@@ -53,11 +53,12 @@ public:
         theta = ApplyErrorFunction(theta, ErrorFromTheta);
         phi = ApplyErrorFunction(phi, ErrorFromPhi);
         // translate back
-        return r * mutil::Vector3{
+        auto coords =  r * mutil::Vector3{
                 std::sin(theta) * std::cos(phi),
                 std::sin(theta) * std::sin(phi),
                 std::cos(theta)
         };
+        return {TLidarPoint::POINT, coords };
     }
 
     void Write(TWriter &writer, const char *key) const override {

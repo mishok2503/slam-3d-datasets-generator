@@ -5,11 +5,6 @@
 #include "Util/Math.h"
 #include "Util/Json.h"
 
-namespace {
-    std::array<float, 4> qualities = {1, 1, 1, 0.1}; // TODO: move to ErrorModel
-    std::uniform_int_distribution<int> choice{0, qualities.size() - 1};
-}
-
 void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTruthOs) {
     rapidjson::StringBuffer dataStringBuffer;
     rapidjson::StringBuffer truthStringBuffer;
@@ -47,11 +42,12 @@ void Simulator::Run(unsigned steps, std::ostream &dataOs, std::ostream &groundTr
                 writer.StartObject(); // lidar_data elem
                 writePointType(writer, point.type);
             });
-            float quality = qualities[choice(GetRandGen())];
-            auto pointWithError = ErrorModel->AddLidarError(point.data, quality);
-            writeVector3(truthWriter, "coordinates", point.data);
-            writeVector3(dataWriter, "coordinates", pointWithError);
-            writeBoth([quality](TWriter &writer) { writeKeyDouble(writer, "quality", quality); });
+            TLidarPoint pointWithError = ErrorModel->AddLidarError(point.Data);
+            writeVector3(truthWriter, "coordinates", point.Data);
+            writeVector3(dataWriter, "coordinates", pointWithError.Data);
+            writeBoth([&pointWithError](TWriter &writer) {
+                writeKeyDouble(writer, "quality", pointWithError.Quality);
+            });
             writeBoth([](TWriter &writer) { writer.EndObject(); }); // lidar_data elem
         }
         writeBoth([](TWriter &writer) { writer.EndArray(); }); // lidar_data

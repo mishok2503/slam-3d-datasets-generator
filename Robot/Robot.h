@@ -14,6 +14,8 @@ private:
     mutil::Vector3 ForwardDirection;
     std::unique_ptr<ILidar> Lidar;
 
+    bool IsMove2D;
+
     float MinDistance = INFINITY;
     const float MinAllowedDistance;
 
@@ -21,10 +23,9 @@ private:
 
 public:
     TRobot(mutil::Vector3 position, std::unique_ptr<ILidar> lidar, float speed,
-           mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection) :
-            Speed(speed), Position(position), EulerAngles(eulerAngles),
-            RotationMatrix(GetRotationMatrix(eulerAngles)),
-            ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(2 * speed) {}
+           mutil::Vector3 eulerAngles, mutil::Vector3 forwardDirection, bool isMove2D)
+           : Speed(speed), Position(position), EulerAngles(eulerAngles), RotationMatrix(GetRotationMatrix(eulerAngles)),
+             ForwardDirection(forwardDirection), Lidar(std::move(lidar)), MinAllowedDistance(2 * speed), IsMove2D(isMove2D) {}
 
     std::vector<TLidarPoint> EmulateLidar(const TMap &map) {
         std::vector<TLidarPoint> res;
@@ -46,9 +47,8 @@ public:
             const auto prevPosition = Position;
             while (MinDistance <= prevMinDistance) { // make rotation to move away from the wall
                 EulerAngles = {
-//                        TwoPiDistribution(GetRandGen()),
-//                        TwoPiDistribution(GetRandGen()),
-                        0, 0,
+                        IsMove2D ? 0 : TwoPiDistribution(GetRandGen()),
+                        IsMove2D ? 0 : TwoPiDistribution(GetRandGen()),
                         TwoPiDistribution(GetRandGen())
                 };
                 RotationMatrix = GetRotationMatrix(EulerAngles);
@@ -81,6 +81,7 @@ private:
     mutil::Vector3 EulerAngles = {};
     mutil::Vector3 ForwardDirection = {1, 0, 0};
     std::unique_ptr<ILidar> Lidar;
+    bool IsMove2D = true;
 
 public:
     explicit TRobotBuilder(std::unique_ptr<ILidar> lidar) : Lidar(std::move(lidar)) {}
@@ -100,8 +101,13 @@ public:
         return *this;
     }
 
-    TRobotBuilder &SetForwardDirection(mutil::Vector3 forwardDirection) {
-        ForwardDirection = std::move(forwardDirection);
+    TRobotBuilder &SetForwardDirection(const mutil::Vector3& forwardDirection) {
+        ForwardDirection = forwardDirection.normalized();
+        return *this;
+    }
+
+    TRobotBuilder &SetIsMove2D(bool isMove2D) {
+        IsMove2D = isMove2D;
         return *this;
     }
 
@@ -111,7 +117,8 @@ public:
                 std::move(Lidar),
                 Speed,
                 std::move(EulerAngles),
-                std::move(ForwardDirection)
+                std::move(ForwardDirection),
+                IsMove2D
         };
     }
 };

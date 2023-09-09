@@ -18,7 +18,7 @@ inline mutil::Matrix3 GetRotationMatrix(mutil::Vector3 eulerAngles) {
     };
 }
 
-inline mutil::Vector3 AddVectorError(const mutil::Vector3 &delta, const float variance , bool is2D) {
+inline mutil::Vector3 AddVectorError(const mutil::Vector3 &delta, const float variance, bool is2D = false) {
     std::normal_distribution<float> normalDistribution{0, variance};
     return delta + mutil::Vector3{
             normalDistribution(GetRandGen()),
